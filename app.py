@@ -11,7 +11,7 @@ DEFAULT_TARGET_URL = "https://34.36.14.133.nip.io/"
 DEFAULT_TOKEN_ENDPOINT = "https://34.120.9.69.nip.io/api-ux-visor-fhir/v1/auth/token"
 DEFAULT_BASE_KEY = "a1c071df1e1b2f4d295d6a44d24ce9e1"
 VERIFY_SSL = True  # Cambia a False solo si hay problemas de certificado y sabes lo que haces
-
+LOAD_FIRST_TIME_API = True
 # ---------------- Helpers ----------------
 def pkcs7_pad(data: bytes, block_size: int = 16) -> bytes:
     pad_len = block_size - (len(data) % block_size)
@@ -44,7 +44,14 @@ def encrypt_text_aes256_cbc(plaintext: str, base_key: str) -> str:
     return f"{iv.hex()}:{encrypted.hex()}"
 
 def get_temp_token(patient_identifier: str):
-    headers = {"Content-Type": "application/json"}
+    global LOAD_FIRST_TIME_API
+    
+    headers = {"Content-Type": "application/json"}  # ← Mover aquí primero
+    
+    if LOAD_FIRST_TIME_API:
+        requests.post(DEFAULT_TOKEN_ENDPOINT, headers=headers, json={}, timeout=20, verify=VERIFY_SSL)
+        LOAD_FIRST_TIME_API = False
+    
     body = {
         "patientIdentifier": patient_identifier,
         "practitionerIdentifier": "a578f7e0fc41136e6599d65f9c7fa6c1:2d0dcd874600aac407238cf48ac4b57e",
@@ -74,7 +81,7 @@ if st.button("Abrir visor ahora"):
         final_url = f"{DEFAULT_TARGET_URL}?temp_token={temp_token}"
         # Redirección automática (nueva pestaña)
         open_new_tab(final_url)
-        st.success("Listo. Se abrió el visor en una nueva pestaña.")
+        st.success("Listo. Se abrió el visor en una nueva pestaña")
     except requests.HTTPError as e:
         try:
             st.error(f"HTTP {e.response.status_code}: {e.response.text}")
@@ -84,7 +91,7 @@ if st.button("Abrir visor ahora"):
         st.error(f"Error: {e}")
 
 
-st.caption("Notas:")
-st.caption("- Si el navegador bloquea la apertura automática de ventanas, habilita los pop-ups para este sitio")
-st.caption("- Es posible que la primera carga tarde hasta 15 segundos, pero después de este primer acceso, las cargas serán mucho más rápidas.")
+st.caption("Consideraciones 👀")
+st.caption("- Si el navegador bloquea la apertura automática de ventanas, habilitar los pop-ups para este sitio")
+st.caption("- La primera carga puede demorar hasta 15 segundos, luego será más rápida")
 
