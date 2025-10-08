@@ -73,7 +73,6 @@ def open_new_tab(url: str):
 # ---------------- UI ----------------
 st.title("Visor FHIR 🔭")
 plaintext = st.text_input("Ingrese el número de documento del paciente (DNI)", value="46927891")
-
 if st.button("Abrir visor ahora"):
     try:
         encrypted_value = encrypt_text_aes256_cbc(plaintext, DEFAULT_BASE_KEY)
@@ -93,5 +92,5 @@ if st.button("Abrir visor ahora"):
 
 st.caption("Consideraciones 👀")
 st.caption("- Si el navegador bloquea la apertura automática de ventanas, habilitar los pop-ups para este sitio")
-st.caption("- La primera carga puede demorar hasta 15 segundos, luego será más rápida")
+st.caption("- La primera carga puede demorar hasta 30 segundos, luego será más rápido")
 
